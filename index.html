@@ -1,0 +1,120 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Clash Royale HTML — v4</title>
+<style>
+:root{/*--blue:#2b6ef6;--gold:#f5c34a;--dark:#071427;--white:#e6eef8*/}
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
+body{margin:0;background:linear-gradient(180deg,#06111b,#071427);color:var(--white)}
+.intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:50;flex-direction:column}
+.intro video{max-width:100%;max-height:100%;display:block;border-radius:10px}
+.logo{margin-top:18px;max-width:420px}
+.start-btn{margin-top:18px;padding:14px 36px;background:linear-gradient(180deg,#2b6ef6,#1e53d8);border-radius:14px;border:4px solid rgba(0,0,0,0.25);box-shadow:0 6px 0 rgba(0,0,0,0.3);color:#fff;font-weight:800;font-size:20px;cursor:pointer;transform:translateY(0);transition:transform .12s ease,opacity .3s}
+.start-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,0.3)}
+.start-btn .trim{display:block;margin-top:6px;color:#f5c34a;font-size:12px;opacity:0.95}
+
+.game{display:none;padding:18px;max-width:1100px;margin:20px auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.trophies{font-weight:700;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:10px}
+.arenaBox{position:relative;background-size:cover;background-position:center;height:540px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+.center-info{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.12);font-size:56px;font-weight:800;pointer-events:none;z-index:4}
+.tower{position:absolute;left:50%;transform:translateX(-50%);text-align:center;z-index:3}
+.tower img{width:92px;height:auto;display:block;margin:0 auto}
+#enemyTower{top:18px}
+#playerTower{bottom:18px}
+.tray{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:10px;justify-content:center;width:90%;z-index:3}
+.card{width:100px;height:130px;border-radius:10px;background:linear-gradient(180deg,#071427,#071a29);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
+.card img{width:60px;height:auto;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="intro" id="intro">
+  <video id='introVideo' autoplay playsinline controls=False><source src='assets/intro.mov' type='video/quicktime'>Your browser does not support the video tag.</video>
+  <img src='assets/logo.png' class='logo' alt='Clash Logo'>
+  <button id="startBtn" class="start-btn" style="opacity:0;pointer-events:none;">
+    START
+    <span class="trim">Press to enter the arena</span>
+  </button>
+</div>
+
+<div class="game" id="game">
+  <div class="topbar">
+    <div><h2 style="margin:0">Clash Royale — Prototype v4</h2><div style="opacity:0.8">Intro, arenas, sounds, trophies</div></div>
+    <div style="text-align:right">
+      <div class="trophies">Trophies: <span id="trophyCount">0</span></div>
+      <div id="arenaName" style="margin-top:6px;font-size:13px;color:rgba(255,255,255,0.8)">Arena: —</div>
+    </div>
+  </div>
+
+  <div class="arenaBox" id="arenaBox" style="background-image:url('assets/arena/placeholder.png')">
+    <div class="center-info" id="centerInfo">READY</div>
+    <div class="tower" id="enemyTower"><img src="assets/enemy_tower.png" alt="Enemy"><div>Enemy HP: <span id="enemyHP">100</span></div></div>
+    <div class="tower" id="playerTower"><img src="assets/player_tower.png" alt="Player"><div>Your HP: <span id="playerHP">100</span></div></div>
+    <div class="tray" id="tray"></div>
+  </div>
+</div>
+
+<script>
+const arenas = [{"id": 0, "name": "Training Camp", "trophies": 0, "image": "assets/arena/training.png"}, {"id": 1, "name": "Goblin Stadium", "trophies": 0, "image": "assets/arena/goblin.png"}, {"id": 2, "name": "Bone Pit", "trophies": 300, "image": "assets/arena/bone.png"}, {"id": 3, "name": "Barbarian Bowl", "trophies": 600, "image": "assets/arena/barbarian.png"}, {"id": 4, "name": "Spell Valley", "trophies": 1000, "image": "assets/arena/spell.png"}, {"id": 5, "name": "Builder's Workshop", "trophies": 1300, "image": "assets/arena/builder.png"}, {"id": 6, "name": "P.E.K.K.A's Playhouse", "trophies": 1600, "image": "assets/arena/placeholder.png"}, {"id": 7, "name": "Royal Arena", "trophies": 2000, "image": "assets/arena/royal.png"}, {"id": 8, "name": "Frozen Peak", "trophies": 2300, "image": "assets/arena/frozen.png"}, {"id": 9, "name": "Jungle Arena", "trophies": 2600, "image": "assets/arena/jungle.png"}, {"id": 10, "name": "Hog Mountain", "trophies": 3000, "image": "assets/arena/hog.png"}, {"id": 11, "name": "Electro Valley", "trophies": 3400, "image": "assets/arena/electro.png"}, {"id": 12, "name": "Spooky Town", "trophies": 3800, "image": "assets/arena/spooky.png"}, {"id": 13, "name": "Rascal's Hideout", "trophies": 4200, "image": "assets/arena/rascal.png"}, {"id": 14, "name": "Serenity Peak", "trophies": 4600, "image": "assets/arena/serenity.png"}, {"id": 15, "name": "Miner's Mine", "trophies": 5000, "image": "assets/arena/miner.png"}, {"id": 16, "name": "Executioner's Kitchen", "trophies": 5500, "image": "assets/arena/executioner.png"}, {"id": 17, "name": "Royal Crypt", "trophies": 6000, "image": "assets/arena/placeholder.png"}, {"id": 18, "name": "Silent Sanctuary", "trophies": 6500, "image": "assets/arena/sanctuary.png"}, {"id": 19, "name": "Dragon Spa", "trophies": 7000, "image": "assets/arena/placeholder.png"}, {"id": 20, "name": "Boot Camp", "trophies": 7500, "image": "assets/arena/placeholder.png"}, {"id": 21, "name": "Clash Fest", "trophies": 8000, "image": "assets/arena/placeholder.png"}, {"id": 22, "name": "PANCAKES!", "trophies": 8500, "image": "assets/arena/ClashRoyaleArenaImages-main/arenas/trophyroad/medium/Pancakes.png"}, {"id": 23, "name": "Valkalla", "trophies": 9000, "image": "assets/arena/ClashRoyaleArenaImages-main/arenas/trophyroad/medium/Valkalla.png"}, {"id": 24, "name": "Legendary Arena", "trophies": 9500, "image": "assets/arena/legendary.png"}];
+
+const cards = [
+  { id:'knight', name:'Knight', cost:3, img:'assets/knight.png' },
+  { id:'archer', name:'Archer', cost:3, img:'assets/archer.png' },
+  { id:'giant', name:'Giant', cost:5, img:'assets/giant.png' },
+  { id:'zap', name:'Zap', cost:2, img:'assets/zap.png', type:'spell' }
+];
+
+let trophies = 0;
+let enemyHP = 100, playerHP = 100;
+
+const tray = document.getElementById('tray');
+const trophyEl = document.getElementById('trophyCount');
+const arenaNameEl = document.getElementById('arenaName');
+const arenaBox = document.getElementById('arenaBox');
+const centerInfo = document.getElementById('centerInfo');
+const enemyHPEl = document.getElementById('enemyHP');
+const playerHPEl = document.getElementById('playerHP');
+
+const allSounds = ["assets/sounds/arenas/arena0.mp3", "assets/sounds/arenas/arena1.mp3", "assets/sounds/arenas/arena10.mp3", "assets/sounds/arenas/arena11.mp3", "assets/sounds/arenas/arena12.mp3", "assets/sounds/arenas/arena13.mp3", "assets/sounds/arenas/arena2.mp3", "assets/sounds/arenas/arena3.mp3", "assets/sounds/arenas/arena4.mp3", "assets/sounds/arenas/arena5.mp3", "assets/sounds/arenas/arena6.mp3", "assets/sounds/arenas/arena7.mp3", "assets/sounds/arenas/arena8.mp3", "assets/sounds/arenas/arena9.mp3", "assets/sounds/deploy/100.mp3", "assets/sounds/deploy/101.mp3", "assets/sounds/deploy/102.mp3", "assets/sounds/deploy/103.mp3", "assets/sounds/deploy/104.mp3", "assets/sounds/deploy/105.mp3", "assets/sounds/deploy/106.mp3", "assets/sounds/deploy/107.mp3", "assets/sounds/deploy/108.mp3", "assets/sounds/deploy/109.mp3", "assets/sounds/deploy/110.mp3", "assets/sounds/deploy/111.mp3", "assets/sounds/deploy/112.mp3", "assets/sounds/deploy/113.mp3", "assets/sounds/deploy/114.mp3", "assets/sounds/deploy/115.mp3", "assets/sounds/deploy/116.mp3", "assets/sounds/deploy/18.mp3", "assets/sounds/deploy/19.mp3", "assets/sounds/deploy/20.mp3", "assets/sounds/deploy/21.mp3", "assets/sounds/deploy/22.mp3", "assets/sounds/deploy/23.mp3", "assets/sounds/deploy/24.mp3", "assets/sounds/deploy/25.mp3", "assets/sounds/deploy/26.mp3", "assets/sounds/deploy/27.mp3", "assets/sounds/deploy/28.mp3", "assets/sounds/deploy/29.mp3", "assets/sounds/deploy/30.mp3", "assets/sounds/deploy/31.mp3", "assets/sounds/deploy/32.mp3", "assets/sounds/deploy/33.mp3", "assets/sounds/deploy/34.mp3", "assets/sounds/deploy/35.mp3", "assets/sounds/deploy/36.mp3", "assets/sounds/deploy/37.mp3", "assets/sounds/deploy/38.mp3", "assets/sounds/deploy/39.mp3", "assets/sounds/deploy/40.mp3", "assets/sounds/deploy/41.mp3", "assets/sounds/deploy/42.mp3", "assets/sounds/deploy/43.mp3", "assets/sounds/deploy/44.mp3", "assets/sounds/deploy/45.mp3", "assets/sounds/deploy/46.mp3", "assets/sounds/deploy/47.mp3", "assets/sounds/deploy/48.mp3", "assets/sounds/deploy/49.mp3", "assets/sounds/deploy/50.mp3", "assets/sounds/deploy/51.mp3", "assets/sounds/deploy/52.mp3", "assets/sounds/deploy/53.mp3", "assets/sounds/deploy/54.mp3", "assets/sounds/deploy/55.mp3", "assets/sounds/deploy/56.mp3", "assets/sounds/deploy/57.mp3", "assets/sounds/deploy/58.mp3", "assets/sounds/deploy/59.mp3", "assets/sounds/deploy/60.mp3", "assets/sounds/deploy/61.mp3", "assets/sounds/deploy/62.mp3", "assets/sounds/deploy/63.mp3", "assets/sounds/deploy/64.mp3", "assets/sounds/deploy/65.mp3", "assets/sounds/deploy/66.mp3", "assets/sounds/deploy/67.mp3", "assets/sounds/deploy/68.mp3", "assets/sounds/deploy/69.mp3", "assets/sounds/deploy/70.mp3", "assets/sounds/deploy/71.mp3", "assets/sounds/deploy/72.mp3", "assets/sounds/deploy/73.mp3", "assets/sounds/deploy/74.mp3", "assets/sounds/deploy/75.mp3", "assets/sounds/deploy/76.mp3", "assets/sounds/deploy/77.mp3", "assets/sounds/deploy/78.mp3", "assets/sounds/deploy/79.mp3", "assets/sounds/deploy/80.mp3", "assets/sounds/deploy/81.mp3", "assets/sounds/deploy/82.mp3", "assets/sounds/deploy/83.mp3", "assets/sounds/deploy/84.mp3", "assets/sounds/deploy/85.mp3", "assets/sounds/deploy/86.mp3", "assets/sounds/deploy/87.mp3", "assets/sounds/deploy/88.mp3", "assets/sounds/deploy/89.mp3", "assets/sounds/deploy/90.mp3", "assets/sounds/deploy/91.mp3", "assets/sounds/deploy/92.mp3", "assets/sounds/deploy/93.mp3", "assets/sounds/deploy/94.mp3", "assets/sounds/deploy/95.mp3", "assets/sounds/deploy/96.mp3", "assets/sounds/deploy/97.mp3", "assets/sounds/deploy/98.mp3", "assets/sounds/deploy/99.mp3"];
+const deploySounds = ["assets/sounds/deploy/100.mp3", "assets/sounds/deploy/101.mp3", "assets/sounds/deploy/102.mp3", "assets/sounds/deploy/103.mp3", "assets/sounds/deploy/104.mp3", "assets/sounds/deploy/105.mp3", "assets/sounds/deploy/106.mp3", "assets/sounds/deploy/107.mp3", "assets/sounds/deploy/108.mp3", "assets/sounds/deploy/109.mp3", "assets/sounds/deploy/110.mp3", "assets/sounds/deploy/111.mp3", "assets/sounds/deploy/112.mp3", "assets/sounds/deploy/113.mp3", "assets/sounds/deploy/114.mp3", "assets/sounds/deploy/115.mp3", "assets/sounds/deploy/116.mp3", "assets/sounds/deploy/18.mp3", "assets/sounds/deploy/19.mp3", "assets/sounds/deploy/20.mp3", "assets/sounds/deploy/21.mp3", "assets/sounds/deploy/22.mp3", "assets/sounds/deploy/23.mp3", "assets/sounds/deploy/24.mp3", "assets/sounds/deploy/25.mp3", "assets/sounds/deploy/26.mp3", "assets/sounds/deploy/27.mp3", "assets/sounds/deploy/28.mp3", "assets/sounds/deploy/29.mp3", "assets/sounds/deploy/30.mp3", "assets/sounds/deploy/31.mp3", "assets/sounds/deploy/32.mp3", "assets/sounds/deploy/33.mp3", "assets/sounds/deploy/34.mp3", "assets/sounds/deploy/35.mp3", "assets/sounds/deploy/36.mp3", "assets/sounds/deploy/37.mp3", "assets/sounds/deploy/38.mp3", "assets/sounds/deploy/39.mp3", "assets/sounds/deploy/40.mp3", "assets/sounds/deploy/41.mp3", "assets/sounds/deploy/42.mp3", "assets/sounds/deploy/43.mp3", "assets/sounds/deploy/44.mp3", "assets/sounds/deploy/45.mp3", "assets/sounds/deploy/46.mp3", "assets/sounds/deploy/47.mp3", "assets/sounds/deploy/48.mp3", "assets/sounds/deploy/49.mp3", "assets/sounds/deploy/50.mp3", "assets/sounds/deploy/51.mp3", "assets/sounds/deploy/52.mp3", "assets/sounds/deploy/53.mp3", "assets/sounds/deploy/54.mp3", "assets/sounds/deploy/55.mp3", "assets/sounds/deploy/56.mp3", "assets/sounds/deploy/57.mp3", "assets/sounds/deploy/58.mp3", "assets/sounds/deploy/59.mp3", "assets/sounds/deploy/60.mp3", "assets/sounds/deploy/61.mp3", "assets/sounds/deploy/62.mp3", "assets/sounds/deploy/63.mp3", "assets/sounds/deploy/64.mp3", "assets/sounds/deploy/65.mp3", "assets/sounds/deploy/66.mp3", "assets/sounds/deploy/67.mp3", "assets/sounds/deploy/68.mp3", "assets/sounds/deploy/69.mp3", "assets/sounds/deploy/70.mp3", "assets/sounds/deploy/71.mp3", "assets/sounds/deploy/72.mp3", "assets/sounds/deploy/73.mp3", "assets/sounds/deploy/74.mp3", "assets/sounds/deploy/75.mp3", "assets/sounds/deploy/76.mp3", "assets/sounds/deploy/77.mp3", "assets/sounds/deploy/78.mp3", "assets/sounds/deploy/79.mp3", "assets/sounds/deploy/80.mp3", "assets/sounds/deploy/81.mp3", "assets/sounds/deploy/82.mp3", "assets/sounds/deploy/83.mp3", "assets/sounds/deploy/84.mp3", "assets/sounds/deploy/85.mp3", "assets/sounds/deploy/86.mp3", "assets/sounds/deploy/87.mp3", "assets/sounds/deploy/88.mp3", "assets/sounds/deploy/89.mp3", "assets/sounds/deploy/90.mp3", "assets/sounds/deploy/91.mp3", "assets/sounds/deploy/92.mp3", "assets/sounds/deploy/93.mp3", "assets/sounds/deploy/94.mp3", "assets/sounds/deploy/95.mp3", "assets/sounds/deploy/96.mp3", "assets/sounds/deploy/97.mp3", "assets/sounds/deploy/98.mp3", "assets/sounds/deploy/99.mp3"];
+
+function playSound(src){ if(!src) return null; try{ const a=new Audio(src); a.play().catch(()=>{}); return a; } catch(e){return null;} }
+
+function playArenaMusicFor(arena){ const candidate1 = 'assets/sounds/arena_' + arena.id + '.mp3'; if(allSounds.includes(candidate1)) { playSound(candidate1); return; } const nameKey = arena.name.toLowerCase().replace(/[^a-z0-9]+/g,'_'); for(const s of allSounds){ if(s.toLowerCase().includes(nameKey)) { playSound(s); return; } } }
+
+function playRandomDeploy(){ if(deploySounds.length===0) return; const idx = Math.floor(Math.random()*deploySounds.length); playSound(deploySounds[idx]); }
+
+function buildTray(){ tray.innerHTML=''; cards.forEach(c=>{ const d=document.createElement('div'); d.className='card'; d.innerHTML = `<img src="${c.img}" alt="${c.name}"><div style="font-weight:700">${c.name}</div><div style="opacity:0.85">Cost: ${c.cost}</div>`; d.onclick = ()=>{ useCard(c); }; tray.appendChild(d); }); }
+
+function useCard(card){ playRandomDeploy(); if(card.type==='spell'){ const dmg = card.dmg || 18; enemyHP = Math.max(0, enemyHP - dmg); enemyHPEl.textContent = enemyHP; flash('Zap!'); checkWin(); return;} flash('Deployed '+card.name); }
+
+function flash(t){ centerInfo.textContent = t; centerInfo.style.opacity = 1; setTimeout(()=>{ centerInfo.style.opacity = 0.12; }, 800); }
+
+function onWin(){ flash('VICTORY! +30 trophies'); trophies += 30; updateTrophies(); checkArenaChange(); }
+function onLose(){ flash('DEFEAT'); }
+
+function updateTrophies(){ trophyEl.textContent = trophies; arenaNameEl.textContent = 'Arena: ' + getCurrentArena(trophies).name; }
+function getCurrentArena(t){ let current = arenas[0]; for(const a of arenas){ if(t >= a.trophies) current = a; else break; } return current; }
+
+function checkArenaChange(){ const a = getCurrentArena(trophies); arenaBox.style.backgroundImage = `url('${a.image}')`; arenaNameEl.textContent = 'Arena: ' + a.name; playArenaMusicFor(a); }
+
+buildTray();
+updateTrophies();
+checkArenaChange();
+
+const intro = document.getElementById('intro');
+const introVideo = document.getElementById('introVideo');
+const startBtn = document.getElementById('startBtn');
+if(introVideo){ introVideo.addEventListener('ended', ()=>{ startBtn.style.opacity = 1; startBtn.style.pointerEvents = 'auto'; }); if(introVideo.readyState>0){ /* may have loaded */ } }
+if(!introVideo || !introVideo.src) { startBtn.style.opacity = 1; startBtn.style.pointerEvents = 'auto'; }
+
+startBtn.addEventListener('click', ()=>{ playRandomDeploy(); intro.style.display = 'none'; document.getElementById('game').style.display = 'block'; checkArenaChange(); });
+
+window.addEventListener('keydown', e=>{ if(e.key==='w'){ onWin(); } if(e.key==='l'){ onLose(); } });
+</script>
+</body>
+</html>
